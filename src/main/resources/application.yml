@@ -1,0 +1,5 @@
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.voydia.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # ?? SQL
