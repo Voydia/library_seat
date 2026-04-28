@@ -1,5 +1,15 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 下面这一行是关键：
+    url: jdbc:mysql://127.0.0.1:3306/library_seat?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+
+
 mybatis-plus:
+  # 这是你原有的配置，保持不变
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.voydia.entity
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # ?? SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 用于打印 SQL 日志
