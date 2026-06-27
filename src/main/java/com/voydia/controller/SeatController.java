@@ -1,5 +1,6 @@
 package com.voydia.controller;
 
+import com.voydia.common.Result;
 import com.voydia.entity.Seat;
 import com.voydia.service.SeatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,14 +20,14 @@ public class SeatController {
 
     @Operation(summary = "获取所有座位")
     @GetMapping("/all")
-    public List<Seat> getAllSeats() {
-        return seatService.list();
+    public Result<List<Seat>> getAllSeats() {
+        return Result.success(seatService.list());
     }
 
     @Operation (summary = "根据id获取座位")
     @GetMapping("/{id}")
-    public Seat getSeatById(@PathVariable Integer id) {
-        return seatService.getById(id);
+    public Result<Seat> getSeatById(@PathVariable Integer id) {
+        return Result.success(seatService.getById(id));
     }
 
     @Operation(summary = "添加座位")

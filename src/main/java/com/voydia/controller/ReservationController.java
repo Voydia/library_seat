@@ -1,5 +1,6 @@
 package com.voydia.controller;
 
+import com.voydia.common.Result;
 import com.voydia.entity.Reservation;
 import com.voydia.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,14 +20,14 @@ public class ReservationController {
 
     @Operation(summary = "全部预约记录")
     @GetMapping("/all")
-    public List<Reservation> getAllReservation(){
-        return reservationService.list();
+    public Result<List<Reservation>> getAllReservation(){
+        return Result.success(reservationService.list());
     }
 
     @Operation(summary = "根据id查预约")
     @GetMapping("/{id}")
-    public Reservation getById(@PathVariable Integer id){
-        return reservationService.getById(id);
+    public Result<Reservation> getById(@PathVariable Integer id){
+        return Result.success(reservationService.getById(id));
     }
 
     @Operation(summary = "新增预约")

@@ -1,6 +1,7 @@
 package com.voydia.controller;
 
 
+import com.voydia.common.Result;
 import com.voydia.service.UserService;
 import com.voydia.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,14 +21,14 @@ public class UserController {
 
     @Operation(summary = "获取所有用户",description = "获取所有用户信息")
     @GetMapping
-    public List<User> getAllUsers(){
-        return userService.list();
+    public Result<List<User>> getAllUsers(){
+        return Result.success(userService.list());
     }
 
     @Operation(summary="根据id查询用户")
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Integer id){
-        return userService.getById(id);
+    public Result<User> getUserById(@PathVariable Integer id){
+        return Result.success(userService.getById(id));
     }
 
     @PostMapping
