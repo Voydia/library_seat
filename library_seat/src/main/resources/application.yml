@@ -1,0 +1,40 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/library_seat?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+  data:
+    redis:
+      host: 192.168.88.190
+      port: 6379
+      password: "051216"
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 10
+          min-idle: 1
+          time-between-eviction-runs: 10s
+  rabbitmq:
+    host: 192.168.88.190
+    port: 5672
+    username: voydia
+    password: "051216"
+    listener:
+      simple:
+        prefetch: 1
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000ms
+mybatis-plus:
+  type-aliases-package: com.voydia.entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 用于打印 SQL 日志
+
+jwt:
+  secret: "your-very-long-random-secret-key-here-should-be-at-least-256-bits"
+  expiration: 7200000 # 2小时，单位毫秒

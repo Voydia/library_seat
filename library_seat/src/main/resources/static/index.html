@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图书馆座位预约</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --free: #16a34a;
+      --busy: #ef4444;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      font-size: 18px;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+
+    .topbar h1 span { color: var(--primary); }
+
+    .user-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      padding: 16px 24px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .card h2 {
+      font-size: 15px;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .floors {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .floor-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .floor-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      gap: 10px;
+      min-height: 120px;
+    }
+
+    .seat {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      background: #fff;
+      transition: .15s;
+    }
+
+    .seat:hover { border-color: var(--primary); transform: translateY(-1px); }
+
+    .seat .no { font-weight: 600; font-size: 15px; }
+    .seat .tag { font-size: 12px; margin-top: 4px; color: var(--muted); }
+    .seat .dot {
+      position: absolute; top: 8px; right: 8px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--free);
+    }
+
+    .seat.busy { background: #fef2f2; border-color: #fecaca; color: #b91c1c; cursor: not-allowed; }
+    .seat.busy .tag { color: #b91c1c; }
+    .seat.busy .dot { background: var(--busy); }
+    .seat.selected { border: 2px solid var(--primary); background: #eff6ff; }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--muted);
+      padding: 32px 0;
+    }
+
+    label { display: block; margin-bottom: 12px; color: var(--muted); font-size: 13px; }
+
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+
+    input:focus { outline: 2px solid #bfdbfe; border-color: var(--primary); }
+
+    .user-input { width: 90px; margin: 0; padding: 6px 8px; }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: var(--primary-dark); }
+    .btn:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    .selected-info {
+      margin: 0 0 12px;
+      padding: 8px 10px;
+      background: #eff6ff;
+      border-radius: 8px;
+      color: var(--primary);
+      font-size: 13px;
+    }
+
+    .reservations { margin-top: 16px; }
+
+    .res-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 13px;
+    }
+
+    .res-item:last-child { border-bottom: none; }
+
+    .res-item .time { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    .link-btn {
+      border: 1px solid #fecaca;
+      background: #fff;
+      color: #b91c1c;
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 24px;
+      transform: translateX(-50%) translateY(-80px);
+      background: #111827;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transition: .25s;
+      z-index: 99;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #b91c1c; }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; padding: 12px; }
+      .topbar { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>图书馆<span>座位预约</span>系统</h1>
+    <div class="user-box">
+      用户 ID
+      <input class="user-input" id="userId" type="number" min="1" value="1">
+      <button class="link-btn" id="refreshBtn" style="color: var(--primary); border-color: #bfdbfe;">刷新</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <h2>座位一览 <span class="muted" id="seatSummary"></span></h2>
+      <div class="floors" id="floors"></div>
+      <div class="seats" id="seats"></div>
+    </section>
+
+    <aside>
+      <section class="card">
+        <h2>预约座位</h2>
+        <p class="selected-info" id="selectedInfo">尚未选择座位</p>
+        <label>日期
+          <input type="date" id="date">
+        </label>
+        <label>开始时间
+          <input type="time" id="startTime" value="09:00">
+        </label>
+        <label>结束时间
+          <input type="time" id="endTime" value="12:00">
+        </label>
+        <button class="btn" id="submitBtn" disabled>确认预约</button>
+      </section>
+
+      <section class="card reservations">
+        <h2>我的预约</h2>
+        <div id="reservationList"><p class="muted">暂无预约记录</p></div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const state = {
+      seats: [],
+      reservations: [],
+      selectedSeatId: null,
+      floor: 'all',
+      userId: 1
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function toast(message, isError = false) {
+      const el = $('toast');
+      el.textContent = message;
+      el.classList.toggle('error', isError);
+      el.classList.add('show');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    async function request(url, options = {}) {
+      const res = await fetch(url, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+      });
+      if (!res.ok) throw new Error('请求失败：' + res.status);
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) return res.json();
+      return res.text();
+    }
+
+    async function loadSeats() {
+      const result = await request('/seat/all');
+      state.seats = Array.isArray(result) ? result : (result.data || []);
+    }
+
+    async function loadReservations() {
+      const result = await request('/reservation/all');
+      state.reservations = Array.isArray(result) ? result : (result.data || []);
+    }
+
+    function seatLabel(seatId) {
+      const seat = state.seats.find(s => s.id === seatId);
+      if (!seat) return '座位 #' + seatId;
+      return (seat.floor != null ? seat.floor + 'F ' : '') + seat.seatNo;
+    }
+
+    function renderFloors() {
+      const floors = [...new Set(state.seats.map(s => s.floor).filter(f => f != null))].sort((a, b) => a - b);
+      const buttons = [{ value: 'all', label: '全部' }].concat(floors.map(f => ({ value: String(f), label: f + 'F' })));
+      $('floors').innerHTML = buttons.map(b =>
+        `<button class="floor-btn ${String(state.floor) === b.value ? 'active' : ''}" data-floor="${b.value}">${b.label}</button>`
+      ).join('');
+      $('floors').querySelectorAll('.floor-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.floor = btn.dataset.floor;
+          renderFloors();
+          renderSeats();
+        });
+      });
+    }
+
+    function renderSeats() {
+      const list = state.seats
+        .filter(s => state.floor === 'all' || String(s.floor) === state.floor)
+        .sort((a, b) => (a.floor ?? 0) - (b.floor ?? 0) || String(a.seatNo).localeCompare(String(b.seatNo)));
+
+      const free = list.filter(s => s.status === 0).length;
+      $('seatSummary').textContent = `共 ${list.length} 个，空闲 ${free} 个`;
+
+      if (!list.length) {
+        $('seats').innerHTML = '<p class="empty">暂无座位数据，请确认后端接口与数据库</p>';
+        return;
+      }
+
+      $('seats').innerHTML = list.map(seat => {
+        const busy = seat.status !== 0;
+        return `
+          <div class="seat ${busy ? 'busy' : ''} ${seat.id === state.selectedSeatId ? 'selected' : ''}" data-id="${seat.id}">
+            <span class="dot"></span>
+            <div class="no">${seat.seatNo ?? '#' + seat.id}</div>
+            <div class="tag">${busy ? '已预约' : '空闲'}${seat.floor != null ? ' · ' + seat.floor + 'F' : ''}</div>
+          </div>`;
+      }).join('');
+
+      $('seats').querySelectorAll('.seat').forEach(el => {
+        el.addEventListener('click', () => {
+          if (el.classList.contains('busy')) {
+            toast('该座位已被预约', true);
+            return;
+          }
+          const id = Number(el.dataset.id);
+          state.selectedSeatId = state.selectedSeatId === id ? null : id;
+          renderSeats();
+          renderSelected();
+        });
+      });
+    }
+
+    function renderSelected() {
+      if (state.selectedSeatId == null) {
+        $('selectedInfo').textContent = '尚未选择座位';
+        $('submitBtn').disabled = true;
+        return;
+      }
+      $('selectedInfo').textContent = '已选：' + seatLabel(state.selectedSeatId);
+      $('submitBtn').disabled = false;
+    }
+
+    function formatTime(value) {
+      if (!value) return '';
+      return value.replace('T', ' ').slice(0, 16);
+    }
+
+    function localDateTime(date = new Date()) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+        + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
+
+    function renderReservations() {
+      const mine = state.reservations
+        .filter(r => Number(r.userId) === state.userId)
+        .sort((a, b) => String(b.startTime).localeCompare(String(a.startTime)));
+
+      if (!mine.length) {
+        $('reservationList').innerHTML = '<p class="muted">暂无预约记录</p>';
+        return;
+      }
+
+      $('reservationList').innerHTML = mine.map(r => `
+        <div class="res-item" data-id="${r.id}">
+          <div>
+            <div>${seatLabel(r.seatId)}</div>
+            <div class="time">${formatTime(r.startTime)} ~ ${formatTime(r.endTime)}</div>
+          </div>
+          <button class="link-btn" data-cancel="${r.id}">取消</button>
+        </div>
+      `).join('');
+
+      $('reservationList').querySelectorAll('[data-cancel]').forEach(btn => {
+        btn.addEventListener('click', () => cancelReservation(Number(btn.dataset.cancel)));
+      });
+    }
+
+    async function submitReservation() {
+      if (state.selectedSeatId == null) return;
+
+      const date = $('date').value;
+      const start = $('startTime').value;
+      const end = $('endTime').value;
+      if (!date || !start || !end) {
+        toast('请选择日期和时间', true);
+        return;
+      }
+      const startTime = `${date}T${start}:00`;
+      const endTime = `${date}T${end}:00`;
+      if (end <= start) {
+        toast('结束时间必须晚于开始时间', true);
+        return;
+      }
+
+      const payload = {
+        seatId: state.selectedSeatId,
+        userId: state.userId,
+        startTime,
+        endTime,
+        status: 0,
+        createTime: localDateTime()
+      };
+
+      $('submitBtn').disabled = true;
+      try {
+        const ok = await request('/reservation', { method: 'POST', body: JSON.stringify(payload) });
+        if (ok === true || ok === 'true') {
+          toast('预约成功');
+          state.selectedSeatId = null;
+          await refresh();
+        } else {
+          toast('预约失败：该时段座位已被占用', true);
+        }
+      } catch (e) {
+        toast(e.message, true);
+      } finally {
+        renderSelected();
+      }
+    }
+
+    async function cancelReservation(id) {
+      if (!confirm('确认取消该预约吗？')) return;
+      try {
+        const ok = await request('/reservation', {
+          method: 'DELETE',
+          body: JSON.stringify({ id })
+        });
+        if (ok === true || ok === 'true') toast('已取消预约');
+        else toast('取消失败', true);
+        await refresh();
+      } catch (e) {
+        toast(e.message, true);
+      }
+    }
+
+    async function refresh() {
+      try {
+        await Promise.all([loadSeats(), loadReservations()]);
+        renderFloors();
+        renderSeats();
+        renderSelected();
+        renderReservations();
+      } catch (e) {
+        toast('数据加载失败：' + e.message, true);
+      }
+    }
+
+    function init() {
+      $('date').value = localDateTime().slice(0, 10);
+
+      $('userId').addEventListener('change', () => {
+        const value = Number($('userId').value);
+        state.userId = value > 0 ? value : 1;
+        $('userId').value = state.userId;
+        renderReservations();
+      });
+      $('refreshBtn').addEventListener('click', refresh);
+      $('submitBtn').addEventListener('click', submitReservation);
+
+      refresh();
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# ===== 通用 =====
+.DS_Store
+Thumbs.db
+*.log
+
+# ===== 后端：Spring Boot / Maven =====
+library_seat/target/
+library_seat/.mvn/wrapper/maven-wrapper.jar
+library_seat/.idea/
+library_seat/*.iml
+library_seat/*.ipr
+library_seat/*.iws
+library_seat/.classpath
+library_seat/.project
+library_seat/.settings/
+library_seat/.factorypath
+library_seat/HELP.md
+
+# ===== 前端：Vue / Vite =====
+library-seat-web/node_modules/
+library-seat-web/dist/
+library-seat-web/dist-ssr/
+library-seat-web/*.local
+library-seat-web/.vscode/*
+!library-seat-web/.vscode/extensions.json
+
+# ===== 根目录误留（仅根目录，不要用通配，否则会误伤前端 package.json） =====
+/node_modules/
+/package-lock.json
+/package.json
+/.screenshots/
